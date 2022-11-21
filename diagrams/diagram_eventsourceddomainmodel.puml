@@ -1,0 +1,189 @@
+@startuml
+!pragma layout smetana
+title eventsourceddomainmodel
+namespace main {
+    class BaseEvent << (S,Aquamarine) >> {
+        - eventUUID uuid.UUID
+        - aggrID uuid.UUID
+        - eventType string
+        - eventID uint32
+        - timestamp time.Time
+
+        + GetEventUUID() uuid.UUID
+        + GetAggrID() uuid.UUID
+        + GetEventType() string
+        + GetEventID() uint32
+        + SetEventID(eventID uint32) 
+        + GetTimeStamp() time.Time
+
+    }
+    class Pet << (S,Aquamarine) >> {
+        - state *PetState
+        - events []PetEvent
+        - uncommittedEvents []PetEvent
+
+        - appendEvent(event PetEvent) 
+
+        + ChangeName(name string) 
+        + Sell() 
+        + Return() 
+        + ClearUnCommittedEvents() 
+
+    }
+    class PetDTO << (S,Aquamarine) >> {
+        + ID string
+        + Name string
+        + Age int32
+        + AddedAt time.Time
+        + IsSold bool
+        + SoldAt *time.Time
+
+    }
+    interface PetEvent  {
+        + GetEventUUID() uuid.UUID
+        + GetAggrID() uuid.UUID
+        + GetEventType() string
+        + GetEventID() uint32
+        + SetEventID(eventID uint32) 
+        + GetTimeStamp() time.Time
+        + GetEventBody() []byte
+
+    }
+    class PetEventChangedName << (S,Aquamarine) >> {
+        - name string
+
+        + GetEventBody() []byte
+
+    }
+    class PetEventInitialized << (S,Aquamarine) >> {
+        - name string
+        - age int32
+        - addedAt time.Time
+
+        + GetEventBody() []byte
+
+    }
+    class PetEventReturned << (S,Aquamarine) >> {
+        + GetEventBody() []byte
+
+    }
+    class PetEventSold << (S,Aquamarine) >> {
+        - soldAt time.Time
+
+        + GetEventBody() []byte
+
+    }
+    interface PetEventStore  {
+        + FetchByID(id string) ([]PetEvent, error)
+        + FetchAll() (<font color=blue>map</font>[string][]PetEvent, error)
+        + Append(id string, newEvents []PetEvent, expectedVersion uint32) error
+
+    }
+    class PetEventStoreMySQL << (S,Aquamarine) >> {
+        - db *gorm.DB
+
+        + FetchByID(id string) ([]PetEvent, error)
+        + FetchAll() (<font color=blue>map</font>[string][]PetEvent, error)
+        + Append(id string, newEvents []PetEvent, expectedVersion uint32) error
+
+    }
+    class PetORM << (S,Aquamarine) >> {
+        + ID string
+        + AggrID string
+        + EventID uint32
+        + EventType string
+        + CreatedAt time.Time
+        + EventBody datatypes.JSON
+
+        + TableName() string
+
+    }
+    interface PetRepository  {
+        + FindByID(id string) (*Pet, error)
+        + FindAll() ([]*Pet, error)
+        + Save(p *Pet, originalVersion uint32) error
+
+    }
+    class PetRepositoryEventStore << (S,Aquamarine) >> {
+        - es PetEventStore
+
+        + FindByID(id string) (*Pet, error)
+        + FindAll() ([]*Pet, error)
+        + Save(p *Pet, originalVersion uint32) error
+
+    }
+    class PetShopService << (S,Aquamarine) >> {
+        - repo PetRepository
+
+        + GetPetByID(id string) (*Pet, error)
+        + GetPetList() ([]*Pet, error)
+        + AddPet(name string, age int32) (*Pet, error)
+        + ChangePetName(id string, name string) error
+        + SellPet(id string) error
+        + ReturnPet(id string) error
+
+    }
+    class PetState << (S,Aquamarine) >> {
+        - id uuid.UUID
+        - name string
+        - age int32
+        - addedAt time.Time
+        - isSold bool
+        - soldAt *time.Time
+        - version uint32
+
+        - applyEventInitialized(event *PetEventInitialized) 
+        - applyEventChangedName(event *PetEventChangedName) 
+        - applyEventSold(event *PetEventSold) 
+        - applyEventReturned(event *PetEventReturned) 
+
+        + ApplyEvent(event PetEvent) 
+
+    }
+    class petEventChangedNameEventBody << (S,Aquamarine) >> {
+        + ID string
+        + PetID string
+        + EventID uint32
+        + EventType string
+        + TimeStamp string
+        + Name string
+
+    }
+    class petEventInitializedEventBody << (S,Aquamarine) >> {
+        + ID string
+        + PetID string
+        + EventID uint32
+        + EventType string
+        + TimeStamp string
+        + Name string
+        + Age int32
+        + AddedAt string
+
+    }
+    class petEventReturnedEventBody << (S,Aquamarine) >> {
+        + ID string
+        + PetID string
+        + EventID uint32
+        + EventType string
+        + TimeStamp string
+
+    }
+    class petEventSoldEventBody << (S,Aquamarine) >> {
+        + ID string
+        + PetID string
+        + EventID uint32
+        + EventType string
+        + TimeStamp string
+        + SoldAt string
+
+    }
+}
+"main.BaseEvent" *-- "main.PetEventChangedName"
+"main.BaseEvent" *-- "main.PetEventInitialized"
+"main.BaseEvent" *-- "main.PetEventReturned"
+"main.BaseEvent" *-- "main.PetEventSold"
+
+"main.PetEventStore" <|-- "main.PetEventStoreMySQL"
+"main.PetRepository" <|-- "main.PetRepositoryEventStore"
+
+@enduml

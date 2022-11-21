@@ -1,0 +1,59 @@
+# We bring this style from uber go style
+# https://github.com/uber-go/guide/blob/master/style.md#linting
+# but we updated it a bit
+# 1. Remove obsoleted goimports and golint and add revive instead
+# 2. Config revive, excluded exported rule
+# 3. Add gosec to help check secure coding issues
+
+# Refer to golangci-lint's example config file for more options and information:
+# https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck
+    - revive
+    - govet
+    - staticcheck
+    - gosec
+
+linters-settings:
+  revive:
+    ignoreGeneratedHeader: false
+    severity: warning
+    confidence: 0.8
+    errorCode: 0
+    warningCode: 0
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported # it required every exported types and methods to be commented which required huge effort, so we comment this rule out
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: redefines-builtin-id
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0

@@ -1,0 +1,19 @@
+@startuml
+!pragma layout smetana
+title transactionscript
+namespace main {
+    class PetShopService << (S,Aquamarine) >> {
+        - db *sql.DB
+
+        + GetPetByID(id string) (<font color=blue>map</font>[string]<font color=blue>interface</font>{}, error)
+        + GetPetList() ([]<font color=blue>map</font>[string]<font color=blue>interface</font>{}, error)
+        + AddPet(name string, age int32) (<font color=blue>map</font>[string]<font color=blue>interface</font>{}, error)
+        + ChangePetName(id string, name string) error
+        + SellPet(id string) error
+        + ReturnPet(id string) error
+
+    }
+}
+
+
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+!pragma layout smetana
+title activerecord
+namespace main {
+    class PetORM << (S,Aquamarine) >> {
+        + ID string
+        + Name string
+        + Age int32
+        + AddedAt time.Time
+        + IsSold bool
+        + SoldAt *time.Time
+
+        + TableName() string
+
+    }
+    class PetShopService << (S,Aquamarine) >> {
+        - db *gorm.DB
+
+        + GetPetByID(id string) (*PetORM, error)
+        + GetPetList() ([]PetORM, error)
+        + AddPet(name string, age int32) (*PetORM, error)
+        + ChangePetName(id string, name string) error
+        + SellPet(id string) error
+        + ReturnPet(id string) error
+
+    }
+}
+
+
+@enduml

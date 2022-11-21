@@ -1,0 +1,69 @@
+@startuml
+!pragma layout smetana
+title domainmodel
+namespace main {
+    class Pet << (S,Aquamarine) >> {
+        - id uuid.UUID
+        - name string
+        - age int32
+        - addedAt time.Time
+        - isSold bool
+        - soldAt *time.Time
+        - version uint32
+
+        + ChangeName(name string) 
+        + Sell() 
+        + Return() 
+
+    }
+    class PetDTO << (S,Aquamarine) >> {
+        + ID string
+        + Name string
+        + Age int32
+        + AddedAt time.Time
+        + IsSold bool
+        + SoldAt *time.Time
+
+    }
+    class PetORM << (S,Aquamarine) >> {
+        + ID string
+        + Name string
+        + Age int32
+        + AddedAt time.Time
+        + IsSold bool
+        + SoldAt *time.Time
+        + Version uint32
+
+        + TableName() string
+
+    }
+    interface PetRepository  {
+        + FindByID(id string) (*Pet, error)
+        + FindAll() ([]*Pet, error)
+        + Save(p *Pet) error
+
+    }
+    class PetRepositoryMySQL << (S,Aquamarine) >> {
+        - db *gorm.DB
+
+        + FindByID(id string) (*Pet, error)
+        + FindAll() ([]*Pet, error)
+        + Save(p *Pet) error
+
+    }
+    class PetShopService << (S,Aquamarine) >> {
+        - repo PetRepository
+
+        + GetPetByID(id string) (*Pet, error)
+        + GetPetList() ([]*Pet, error)
+        + AddPet(name string, age int32) (*Pet, error)
+        + ChangePetName(id string, name string) error
+        + SellPet(id string) error
+        + ReturnPet(id string) error
+
+    }
+}
+
+"main.PetRepository" <|-- "main.PetRepositoryMySQL"
+
+@enduml
